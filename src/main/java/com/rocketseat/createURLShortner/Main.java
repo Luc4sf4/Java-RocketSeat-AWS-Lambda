@@ -6,8 +6,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Main implements RequestHandler<Map<String, Object>, Map<String, String>> {
 
@@ -15,8 +17,8 @@ public class Main implements RequestHandler<Map<String, Object>, Map<String, Str
 
     @Override
     public Map<String, String> handleRequest(Map<String, Object> input, Context context) {
-        String body = (String) input.get("body").toString();
-        
+        String body = input.get("body").toString();
+
 
         Map<String, String> bodyMap;
         try {
@@ -28,6 +30,10 @@ public class Main implements RequestHandler<Map<String, Object>, Map<String, Str
         String originalUrl = bodyMap.get("originalURL");
         String experationTime = bodyMap.get("expirationTime");
 
-        return null;
+        String shortURLCode = UUID.randomUUID().toString().substring(0, 8);
+        Map<String, String> response = new HashMap<>();
+        response.put("code", shortURLCode);
+
+        return response;
     }
 }
