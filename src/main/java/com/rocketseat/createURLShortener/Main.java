@@ -1,19 +1,22 @@
-package com.rocketseat.createURLShortner;
+package com.rocketseat.createURLShortener;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
+
 
 public class Main implements RequestHandler<Map<String, Object>, Map<String, String>> {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final S3Client s3Client = S3Client.builder().build();
 
     @Override
     public Map<String, String> handleRequest(Map<String, Object> input, Context context) {
@@ -28,9 +31,24 @@ public class Main implements RequestHandler<Map<String, Object>, Map<String, Str
         }
 
         String originalUrl = bodyMap.get("originalURL");
-        String experationTime = bodyMap.get("expirationTime");
+        String expirationTime = bodyMap.get("expirationTime");
+        long expirationTimeInSeconds = Long.parseLong(expirationTime) * 3600;
 
         String shortURLCode = UUID.randomUUID().toString().substring(0, 8);
+
+        URLData urlData = new URLData(originalUrl, expirationTimeInSeconds);
+
+        try {
+            String urlDataJson = objectMapper.writeValueAsString(urlData);
+
+
+            PutObjectRequest request = PutObjectRequest.builder()
+                    .bucket("url-shortener-storage")
+                    .key(shortURLCode)
+                    .build();
+        } catch () {
+        }
+
         Map<String, String> response = new HashMap<>();
         response.put("code", shortURLCode);
 
